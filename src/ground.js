@@ -27,6 +27,9 @@ class FLGround {
     }
 
     update() {
-
+        this.frame.dx -= this.speed;
+        if ( this.frame.dx < this.maxOffset * -1 ) {
+            this.frame.dx = 0;
+        }
     }
 }
