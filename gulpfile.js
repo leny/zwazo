@@ -10,6 +10,7 @@ var gulp = require( "gulp" ),
     babel = require( "gulp-babel" ),
     rename = require( "gulp-rename" ),
     sourcemaps = require( "gulp-sourcemaps" ),
+    concat = require( "gulp-concat" ),
     fCompileExo;
 
 // --- Task for js
@@ -17,6 +18,7 @@ var gulp = require( "gulp" ),
 gulp.task( "js", function() {
     gulp.src( "src/**/*.js" )
         .pipe( sourcemaps.init() )
+        .pipe( concat( "app.js" ) )
         .pipe( babel() )
         .on( "error", function( oError ) {
             console.error( oError );
@@ -32,9 +34,7 @@ gulp.task( "js", function() {
 // --- Watch tasks
 
 gulp.task( "watch", function() {
-    aFolders.forEach( function( sFolder ) {
-        gulp.watch( "src/**/*.js", "js" );
-    } );
+    gulp.watch( "src/**/*.js", [ "js" ] );
 } );
 
 // --- Aliases
