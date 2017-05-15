@@ -11,12 +11,13 @@ var gulp = require( "gulp" ),
     rename = require( "gulp-rename" ),
     sourcemaps = require( "gulp-sourcemaps" ),
     concat = require( "gulp-concat" ),
+    addSrc = require( "gulp-add-src" ),
     fCompileExo;
 
 // --- Task for js
 
 gulp.task( "js", function() {
-    gulp.src( "src/**/*.js" )
+    gulp.src( [ "src/**/*.js" ] )
         .pipe( sourcemaps.init() )
         .pipe( concat( "app.js" ) )
         .pipe( babel() )
@@ -25,6 +26,8 @@ gulp.task( "js", function() {
             this.emit( "end" );
         } )
         .pipe( sourcemaps.write() )
+        .pipe( addSrc( "node_modules/axios/dist/axios.min.js" ) )
+        .pipe( concat( "app.js" ) )
         .pipe( rename( function( path ) {
             path.basename += ".min";
         } ) )

@@ -29,7 +29,7 @@ class FLBird {
                 "sy": 982,
                 "sw": 34,
                 "sh": 24,
-            }
+            },
         ];
 
         this.animation = {
@@ -38,7 +38,6 @@ class FLBird {
         };
 
         this.state = {
-            "inDanger": false,
             "speed": 0,
             "acceleration": 0,
             "boost": 0,
