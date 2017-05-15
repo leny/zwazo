@@ -17,12 +17,6 @@ class Flappy {
         this.height = height;
         this.animationRequestId = null;
 
-        // init game-related properties
-        this.started = false;
-        this.ended = false;
-        this.score = 0;
-        this.insideTubeIndex = null;
-
         // load spritesheet
         this.sprites = new Image();
         this.sprites.addEventListener( "load", () => {
@@ -43,8 +37,6 @@ class Flappy {
     reset() {
         let { width, height } = this;
 
-        this.score = 0;
-        this.insideTubeIndex = null;
         this.background = new FLBackground( width, height );
         this.starting = new FLStarting( width, height );
         this.ground = new FLGround( width, height );
@@ -55,18 +47,25 @@ class Flappy {
             new FLTubesPair( width, height, 680 ),
         ];
 
+        // init game-related properties
         this.started = false;
         this.ended = false;
+        this.score = 0;
+        this.insideTubeIndex = null;
     }
 
     animate() {
         this.animationRequestId = window.requestAnimationFrame( this.animate.bind( this ) );
 
+        // check game state
+        if ( this.started ) {
+            this.checkState();
+        }
         // update elements
         if ( this.started ) {
             this.ground.update();
-            this.tubes.forEach( ( oTube ) => oTube.update() );
             this.bird.update();
+            this.tubes.forEach( ( oTube ) => oTube.update() );
         }
         // draw
         this.context.clearRect( 0, 0, this.width, this.height );
@@ -75,12 +74,11 @@ class Flappy {
         this.ground.draw( this );
         if ( this.started ) {
             this.bird.draw( this );
+            if ( this.ended ) {
+                this.gameOver.draw( this );
+            }
         } else {
             this.starting.draw( this );
-        }
-        // check game state
-        if ( this.started ) {
-            this.checkState();
         }
     }
 
@@ -96,7 +94,7 @@ class Flappy {
         }
 
         if ( this.ended ) {
-            if ( window.confirm( "Relancer le jeu ?" ) ) {
+            if ( window.confirm( "Voulez-vous rejouer ?" ) ) {
                 this.reset();
                 this.animate();
             }
@@ -104,7 +102,7 @@ class Flappy {
     }
 
     checkState() {
-        let { "dx": birdX, "dy": birdY, "dh": birdH, "dw": birdW } = this.bird.destinationFrame,
+        let { "dx": birdX, "dy": birdY, "dw": birdW, "dh": birdH } = this.bird.destinationFrame,
             { "dy": groundY } = this.ground.frame;
 
         // bird vs ground
@@ -112,21 +110,22 @@ class Flappy {
             this.over();
         }
 
-        // bird vs tubes
-        this.tubes.forEach( ( oTube, iTubeIndex ) => {
+        // bird vs pipes
+        this.tubes.forEach( ( oTube, iIndex ) => {
             let { "dx": tbX, "dy": tbY, "dw": tbW, "dh": tbH } = oTube.frames.top,
                 { "dy": tbBottomY } = oTube.frames.bottom;
 
             // step one : check if bird is inside tube horizontal zone
             if ( birdX > tbX && ( birdX + birdW ) < ( tbX + tbW ) ) {
                 // step two : check if bird is inside tube "danger zone"
+                // bug bounty : this is kinda lacky and have a flaw. submit a PR to gain extra credits! (haha, fat chance)
                 if ( ( tbY + tbH ) < birdY && ( birdY + birdH ) < tbBottomY ) {
-                    this.insideTubeIndex = iTubeIndex;
+                    this.insideTubeIndex = iIndex;
                 } else {
                     this.over();
                 }
             } else {
-                if ( this.insideTubeIndex === iTubeIndex ) {
+                if ( this.insideTubeIndex === iIndex ) {
                     this.insideTubeIndex = null;
                     this.score++;
                 }
@@ -138,8 +137,6 @@ class Flappy {
         this.ended = true;
 
         window.cancelAnimationFrame( this.animationRequestId );
-
-        this.gameOver.draw( this );
 
         // TODO: call axios.get & axios.post
         /*

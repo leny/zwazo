@@ -70,5 +70,7 @@ FLTubesPair.generateNextPairHeight = function() {
     ( iNewValue > -50 ) && ( iNewValue = -50 );
     ( iNewValue < -300 ) && ( iNewValue = -300 );
 
+    FLTubesPair.lastPairHeight = iNewValue;
+
     return iNewValue;
 };
